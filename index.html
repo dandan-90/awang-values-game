@@ -13,20 +13,17 @@ canvas{display:block;border-radius:12px;width:100%!important;height:100%!importa
 /* Touch controls — hidden on desktop, visible on touch devices */
 #touch-controls{display:none;position:absolute;inset:0;z-index:10;pointer-events:none;}
 #touch-controls.active{display:block;}
-.touch-btn{position:absolute;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:50%;pointer-events:auto;touch-action:none;transition:background .1s;-webkit-tap-highlight-color:transparent;}
-.touch-btn:active,.touch-btn.pressed{background:rgba(255,255,255,.55);border-color:#FFF;}
-.btn-left{left:4%;bottom:12%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
-.btn-right{left:22%;bottom:12%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
-.btn-up{left:13%;bottom:28%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
-.btn-down{left:13%;bottom:0%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
-.btn-a{right:16%;bottom:18%;width:18vw;height:18vw;max-width:100px;max-height:100px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:bold;}
-.btn-b{right:4%;bottom:8%;width:14vw;height:14vw;max-width:75px;max-height:75px;font-size:14px;display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:bold;}
+/* Virtual Joystick */
+#joystick-zone{position:absolute;left:0;bottom:0;width:45%;height:70%;pointer-events:auto;touch-action:none;}
+#joystick-base{position:absolute;left:22%;bottom:24%;width:21vw;height:21vw;max-width:110px;max-height:110px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.3);pointer-events:none;transform:translate(-50%,-50%);}
+#joystick-thumb{position:absolute;width:11vw;height:11vw;max-width:55px;max-height:55px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.6);pointer-events:none;transform:translate(-50%,-50%);transition:background .1s;}
+#joystick-thumb.active{background:rgba(255,255,255,.6);border-color:#FFF;box-shadow:0 0 12px rgba(255,255,255,.3);}
+/* Jump button */
+.touch-btn{position:absolute;border-radius:50%;pointer-events:auto;touch-action:none;transition:background .1s;-webkit-tap-highlight-color:transparent;}
+.touch-btn.pressed{background:rgba(255,255,255,.55)!important;border-color:#FFF!important;}
+.btn-jump{right:14%;bottom:20%;width:20vw;height:20vw;max-width:110px;max-height:110px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;}
 .btn-label{font-size:clamp(14px,3vw,22px);font-weight:700;color:#FFF;text-shadow:0 1px 3px rgba(0,0,0,.5);}
-.btn-label-sm{font-size:clamp(10px,2.5vw,16px);font-weight:700;color:#FFF;text-shadow:0 1px 3px rgba(0,0,0,.5);}
-/* Arrow indicators inside d-pad */
-.btn-arrow{font-size:clamp(16px,4vw,30px);color:#FFF;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.6);line-height:1;}
-.ctrl-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:11px;font-family:'Noto Sans SC',sans-serif;pointer-events:none;text-align:center;width:100%;}
-/* Show keyboard hints on desktop */
+.ctrl-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.45);font-size:10px;font-family:'Noto Sans SC',sans-serif;pointer-events:none;text-align:center;width:100%;}
 .kb-hint{display:block;}
 @media(hover:hover)and(pointer:fine){.kb-hint{display:block}.ctrl-hint{display:none}}
 @media(hover:none)and(pointer:coarse){.kb-hint{display:none}.ctrl-hint{display:block}}
@@ -36,13 +33,13 @@ canvas{display:block;border-radius:12px;width:100%!important;height:100%!importa
 <div id="game-wrapper">
 <canvas id="game"></canvas>
 <div id="touch-controls">
-  <!-- D-Pad for L2 (4-direction) -->
-  <div class="touch-btn btn-up" data-key="w,arrowup"><span class="btn-arrow">▲</span></div>
-  <div class="touch-btn btn-down" data-key="s,arrowdown"><span class="btn-arrow">▼</span></div>
-  <div class="touch-btn btn-left" data-key="a,arrowleft"><span class="btn-arrow">◀</span></div>
-  <div class="touch-btn btn-right" data-key="d,arrowright"><span class="btn-arrow">▶</span></div>
-  <!-- A/B buttons for actions (jump / confirm) -->
-  <div class="touch-btn btn-a" data-key=" "><span class="btn-label">Jump</span></div>
+  <!-- Virtual Joystick -->
+  <div id="joystick-zone">
+    <div id="joystick-base"><div id="joystick-thumb"></div></div>
+  </div>
+  <!-- Jump button -->
+  <div class="touch-btn btn-jump" data-key=" "><span class="btn-label">Jump</span></div>
+  <div class="ctrl-hint">👆 左侧滑动控制方向 | 右侧 Jump 跳跃/确认</div>
 </div>
 </div>
 <script>
@@ -71,13 +68,14 @@ window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code
 window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;keys[e.code]=false});
 
 // ════════════════════════════════
-//  TOUCH & MOBILE SUPPORT
+//  TOUCH & MOBILE SUPPORT (Virtual Joystick)
 // ════════════════════════════════
 const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||('ontouchstart' in window);
 const tcEl=document.getElementById('touch-controls');
 const wrapperEl=document.getElementById('game-wrapper');
 if(isMobile||!window.matchMedia('(hover:hover) and (pointer:fine)').matches){tcEl.classList.add('active');}
-// Canvas auto-scale to fit viewport
+
+// Canvas auto-scale
 function scaleCanvas(){
   const vw=window.innerWidth,vh=window.innerHeight;
   const scale=Math.min(vw/960,vh/640);
@@ -86,47 +84,85 @@ function scaleCanvas(){
 }
 scaleCanvas();window.addEventListener('resize',scaleCanvas);window.addEventListener('orientationchange',()=>setTimeout(scaleCanvas,200));
 
-// Touch button handling — set keys on touch
-const activeTouches=new Map(); // touchId → {keys, el}
-function handleTouchStart(e){
-  e.preventDefault();const btn=e.target.closest('.touch-btn');if(!btn)return;
-  btn.classList.add('pressed');
-  const keyStr=btn.dataset.key||' ';
-  const karr=keyStr.split(',');
-  for(const t of e.changedTouches){
-    activeTouches.set(t.identifier,{keys:karr,el:btn});
-    for(const k of karr)keys[k]=true;
-  }
+// ── Virtual Joystick ──
+const jZone=document.getElementById('joystick-zone');
+const jThumb=document.getElementById('joystick-thumb');
+const jBase=document.getElementById('joystick-base');
+let jId=null; // touch id currently controlling joystick
+let jCX=0,jCY=0; // center of joystick (in wrapper-relative px)
+let jMaxR=55; // max thumb travel radius (px, updated on resize)
+
+function updateJoystickMetrics(){
+  const br=jBase.getBoundingClientRect();
+  jCX=br.left+br.width/2; jCY=br.top+br.height/2;
+  jMaxR=br.width*.45;
 }
-function handleTouchMove(e){
+updateJoystickMetrics();window.addEventListener('resize',updateJoystickMetrics);
+
+function updateKeysFromJoystick(dx,dy){
+  const dead=.2; // dead zone threshold
+  const ax=Math.abs(dx)/jMaxR,ay=Math.abs(dy)/jMaxR;
+  // Horizontal: require exceeding dead zone
+  if(ax>dead){keys['a']=dx<0;keys['arrowleft']=dx<0;keys['d']=dx>0;keys['arrowright']=dx>0;}
+  else{keys['a']=keys['arrowleft']=keys['d']=keys['arrowright']=false;}
+  // Vertical: require exceeding dead zone (but don't override jump button)
+  if(ay>dead){keys['w']=dy<0;keys['arrowup']=dy<0;keys['s']=dy>0;keys['arrowdown']=dy>0;}
+  else{keys['w']=keys['arrowup']=keys['s']=keys['arrowdown']=false;}
+}
+
+function clearJoystickKeys(){
+  keys['a']=keys['arrowleft']=keys['d']=keys['arrowright']=false;
+  keys['w']=keys['arrowup']=keys['s']=keys['arrowdown']=false;
+}
+
+jZone.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){
-    // Release old button
-    const old=activeTouches.get(t.identifier);
-    if(old){old.el.classList.remove('pressed');for(const k of old.keys)keys[k]=false;}
-    // Check new button under finger
-    const el=document.elementFromPoint(t.clientX,t.clientY);
-    const btn=el?el.closest('.touch-btn'):null;
-    if(btn){
-      btn.classList.add('pressed');
-      const karr=(btn.dataset.key||' ').split(',');
-      activeTouches.set(t.identifier,{keys:karr,el:btn});
-      for(const k of karr)keys[k]=true;
-    }else{activeTouches.delete(t.identifier);}
+    if(jId!==null)continue; // already controlled
+    jId=t.identifier; updateJoystickMetrics();
+    jThumb.style.left=jCX+'px'; jThumb.style.top=jCY+'px';
+    jThumb.classList.add('active');
   }
-}
-function handleTouchEnd(e){
+},{passive:false});
+
+jZone.addEventListener('touchmove',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){
-    const old=activeTouches.get(t.identifier);
-    if(old){old.el.classList.remove('pressed');for(const k of old.keys)keys[k]=false;activeTouches.delete(t.identifier);}
+    if(t.identifier!==jId)continue;
+    const dx=t.clientX-jCX, dy=t.clientY-jCY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const clampDist=Math.min(dist,jMaxR);
+    const nx=dist>0?(dx/dist)*clampDist:0, ny=dist>0?(dy/dist)*clampDist:0;
+    jThumb.style.left=(jCX+nx)+'px'; jThumb.style.top=(jCY+ny)+'px';
+    updateKeysFromJoystick(nx,ny);
   }
+},{passive:false});
+
+jZone.addEventListener('touchend',e=>{
+  for(const t of e.changedTouches){
+    if(t.identifier===jId){
+      jId=null; jThumb.classList.remove('active');
+      jThumb.style.left=jCX+'px'; jThumb.style.top=jCY+'px';
+      clearJoystickKeys();
+    }
+  }
+});
+jZone.addEventListener('touchcancel',e=>{jId=null;jThumb.classList.remove('active');jThumb.style.left=jCX+'px';jThumb.style.top=jCY+'px';clearJoystickKeys();});
+
+// ── Jump / Confirm button (traditional tap button) ──
+const btnJump=document.querySelector('.btn-jump');
+if(btnJump){
+  btnJump.addEventListener('touchstart',e=>{
+    e.preventDefault();btnJump.classList.add('pressed');keys[' ']=true;
+  });
+  btnJump.addEventListener('touchend',e=>{
+    e.preventDefault();btnJump.classList.remove('pressed');keys[' ']=false;
+  });
+  btnJump.addEventListener('touchcancel',e=>{
+    btnJump.classList.remove('pressed');keys[' ']=false;
+  });
 }
-tcEl.addEventListener('touchstart',handleTouchStart,{passive:false});
-tcEl.addEventListener('touchmove',handleTouchMove,{passive:false});
-tcEl.addEventListener('touchend',handleTouchEnd,{passive:false});
-tcEl.addEventListener('touchcancel',handleTouchEnd,{passive:false});
-// Mobile: tap canvas for menu actions (space)
+// Mobile: tap canvas for menu confirm (space + enter)
 if(isMobile){canvas.addEventListener('click',()=>{keys[' ']=true;keys['enter']=true;setTimeout(()=>{keys[' ']=false;keys['enter']=false},120);});}
 else{canvas.addEventListener('click',()=>{keys[' ']=true;setTimeout(()=>keys[' ']=false,100)});}
 
@@ -397,7 +433,7 @@ draw(ctx){
   const fx=4680-cx;ctx.fillStyle='#00A800';ctx.fillRect(fx-5,480,30,100);ctx.fillStyle='#58D854';ctx.fillRect(fx-3,480,10,100);ctx.fillRect(fx-3,480,26,10);ctx.fillStyle='#008800';ctx.fillRect(fx-5,480,30,8);ctx.fillRect(fx-8,475,36,10);ctx.fillStyle='#FFF';ctx.font='bold 11px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText('终',fx+10,510);ctx.fillText('点',fx+10,530);
   this._hud(ctx);
 }
-_hud(ctx){const p=clamp(this.player.x/4500,0,1);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(15,15,220,10);ctx.fillStyle='#4A90D9';ctx.fillRect(15,15,220*p,10);ctx.strokeStyle='#FFF';ctx.lineWidth=1.5;ctx.strokeRect(15,15,220,10);ctx.fillStyle='#FFF';ctx.font='bold 9px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText(Math.floor(p*100)+'%',125,24);ctx.fillStyle='#2C1810';ctx.font='bold 12px "Noto Sans SC"';ctx.textAlign='right';ctx.fillText('第一关：横版闯关',W-18,22);ctx.fillStyle='#FFF';ctx.font='10px "Noto Sans SC"';ctx.fillText('宝物 '+this.collected+'/4',W-18,36);for(let i=0;i<4;i++){const t=this.treasures[i];ctx.fillStyle=t.collected?'#FFD700':'rgba(255,255,255,.2)';ctx.font='10px "Noto Sans SC"';ctx.fillText('⭐ '+t.data.name,W-18,52+i*16)}ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px "Noto Sans SC"';ctx.textAlign='left';ctx.fillText('A/D 移动 | W/空格 跳跃 | 踩头消灭敌人',18,H-10);
+_hud(ctx){const p=clamp(this.player.x/4500,0,1);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(15,15,220,10);ctx.fillStyle='#4A90D9';ctx.fillRect(15,15,220*p,10);ctx.strokeStyle='#FFF';ctx.lineWidth=1.5;ctx.strokeRect(15,15,220,10);ctx.fillStyle='#FFF';ctx.font='bold 9px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText(Math.floor(p*100)+'%',125,24);ctx.fillStyle='#2C1810';ctx.font='bold 12px "Noto Sans SC"';ctx.textAlign='right';ctx.fillText('第一关：横版闯关',W-18,22);ctx.fillStyle='#FFF';ctx.font='10px "Noto Sans SC"';ctx.fillText('宝物 '+this.collected+'/4',W-18,36);for(let i=0;i<4;i++){const t=this.treasures[i];ctx.fillStyle=t.collected?'#FFD700':'rgba(255,255,255,.2)';ctx.font='10px "Noto Sans SC"';ctx.fillText('⭐ '+t.data.name,W-18,52+i*16)}ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px "Noto Sans SC"';ctx.textAlign='left';ctx.fillText('←→移动 | Jump跳跃 | 踩头消灭敌人',18,H-10);
   // Ability HUD
   const p2=this.player;
   if(p2.ability){const abNames={shield:'🛡 价值护盾',speed:'💨 极速',reveal:'👁 洞察光环',wave:'🌊 共赢波'};const abColors={shield:'#FFD700',speed:'#4FC3F7',reveal:'#CE93D8',wave:'#81C784'};const abName=abNames[p2.ability]||'';const abCol=abColors[p2.ability]||'#FFF';const dur=p2.abilityTimer;ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.roundRect(W/2-80,38,160,22,8);ctx.fill();const pct=clamp(dur/8,0,1);ctx.fillStyle=abCol+'80';ctx.beginPath();ctx.roundRect(W/2-76,42,152*pct,14,6);ctx.fill();ctx.fillStyle='#FFF';ctx.font='bold 10px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText(abName+' '+Math.ceil(dur)+'s',W/2,55)}
@@ -657,7 +693,7 @@ class Level2{
     ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='10px "Noto Sans SC"';ctx.fillText('宝物 '+this.col+'/4',W-18,36);
     for(let i=0;i<4;i++){const td=T2[i];ctx.fillStyle=this.tc[i]?td.color:'rgba(255,255,255,.2)';ctx.font='10px "Noto Sans SC"';ctx.fillText('⭐ '+td.name,W-18,52+i*16)}
     if(this.msgT>0){const a=Math.min(1,this.msgT*2);ctx.fillStyle=`rgba(0,0,0,${a*.85})`;const mw=ctx.measureText(this.msg).width+40;ctx.fillRect(W/2-mw/2,H-75,mw,35);ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.font='bold 13px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText(this.msg,W/2,H-50)}
-    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='10px "Noto Sans SC"';ctx.textAlign='left';ctx.fillText('WASD/方向键 移动 | 自动射击 | 消灭敌人收集宝物',18,H-25);
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='10px "Noto Sans SC"';ctx.textAlign='left';ctx.fillText('摇杆移动 | 自动射击 | 消灭敌人收集宝物',18,H-25);
     ctx.fillText('目标：消灭敌人 → 收集4⭐宝物 → 击败👑BOSS',18,H-10);
     // L2 Ability HUD
     const p2=this.player;
@@ -705,7 +741,7 @@ function drawMenu(){
   const pp=new Player(W/2-19,280);pp.wc=gt*2;pp.facing=1;pp.draw(ctx,0,0,'front');
   ctx.fillStyle='#2C1810';ctx.font='bold 15px "Noto Sans SC"';ctx.textAlign='center';ctx.fillText('在三旺星球，一台小交换机渐渐苏醒，拥有了生命——他就是阿旺。',W/2,355);ctx.fillText('收集 8 个价值观宝物，带领三旺通信迈向年营收 10 亿！',W/2,380);
   const by=420,bw=260,bh=50;ctx.fillStyle='#E74C3C';ctx.beginPath();ctx.roundRect(W/2-bw/2,by,bw,bh,25);ctx.fill();ctx.fillStyle='#FF6B6B';ctx.beginPath();ctx.roundRect(W/2-bw/2+3,by+3,bw-6,bh-12,22);ctx.fill();ctx.fillStyle='#FFF';ctx.font='bold 20px "Noto Sans SC"';ctx.fillText('按 空格键 开始冒险',W/2,by+34);
-  ctx.fillStyle='rgba(0,0,0,.5)';ctx.font='11px "Noto Sans SC"';ctx.fillText('第一关：横版闯关    A/D移动 W/空格跳跃',W/2,498);ctx.fillText('第二关：雷霆战机    WASD移动 自动射击',W/2,518);
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.font='11px "Noto Sans SC"';ctx.fillText('第一关：横版闯关    ←→移动 Jump跳跃',W/2,498);ctx.fillText('第二关：雷霆战机    摇杆移动 自动射击',W/2,518);
   ctx.fillStyle='#FFD700';ctx.font='bold 10px "Noto Sans SC"';ctx.fillText('🎯 目标：年营收 10 亿  |  3onedata',W/2,540);
 }
 function drawIntro(lvl,treas){
@@ -715,8 +751,8 @@ function drawIntro(lvl,treas){
   ctx.fillStyle='#FFF';ctx.font='16px "Noto Sans SC"';ctx.fillText(isL1?'跑酷！收集前 4 个价值观宝物':'射击！阿旺驾驶战机，消灭敌人收集宝物！',W/2,120);
   ctx.fillStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.roundRect(W/2-220,140,440,isL1?45:70,10);ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='14px "Noto Sans SC"';
-  if(isL1){ctx.fillText('A / D  左右移动    |    空格 / W  跳跃    |    踩头消灭敌人',W/2,168)}
-  else{ctx.fillText('WASD / 方向键 移动    |    自动连射    |    躲避弹幕',W/2,162);ctx.fillText('消灭敌人积累击杀 → 宝物掉落在地图上 → 收集4个后BOSS出现',W/2,184)}
+  if(isL1){ctx.fillText('← →  左右移动    |    Jump 按钮跳跃    |    踩头消灭敌人',W/2,168)}
+  else{ctx.fillText('摇杆移动    |    自动连射    |    躲避弹幕',W/2,162);ctx.fillText('消灭敌人积累击杀 → 宝物掉落在地图上 → 收集4个后BOSS出现',W/2,184)}
   const sy=isL1?230:245;
   for(let i=0;i<4;i++){const t=treas[i],x=W/2-155+(i%2)*310,y=sy+Math.floor(i/2)*60;ctx.fillStyle=t.color+'30';ctx.beginPath();ctx.roundRect(x-80,y-22,160,44,10);ctx.fill();ctx.fillStyle=t.color;ctx.beginPath();ctx.arc(x-58,y,13,0,Math.PI*2);ctx.fill();ctx.fillStyle='#FFF';ctx.font='bold 14px "Noto Sans SC"';ctx.textAlign='left';ctx.fillText('⭐ '+t.name,x-38,y+5);ctx.textAlign='center'}
   if(!isL1){ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='13px "Noto Sans SC"';ctx.fillText('🎯 每消灭4个敌人掉落1个宝物 | 集齐4个 → BOSS战 → 胜利！',W/2,400)}
