@@ -44,7 +44,7 @@ canvas{display:block;border-radius:12px;width:100%!important;height:100%!importa
 </div>
 <script>
 // ═══════════════════════════════════════════════════
-//  阿旺的价值观之旅 v5.1 — PC+移动端双端支持
+//  阿旺的价值观之旅 v5.2 — 虚拟摇杆操控
 // ═══════════════════════════════════════════════════
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const W=960,H=640;canvas.width=W;canvas.height=H;
@@ -93,9 +93,7 @@ let jCX=0,jCY=0; // center of joystick (in wrapper-relative px)
 let jMaxR=55; // max thumb travel radius (px, updated on resize)
 
 function updateJoystickMetrics(){
-  const br=jBase.getBoundingClientRect();
-  jCX=br.left+br.width/2; jCY=br.top+br.height/2;
-  jMaxR=br.width*.45;
+  jMaxR=jBase.getBoundingClientRect().width*.45;
 }
 updateJoystickMetrics();window.addEventListener('resize',updateJoystickMetrics);
 
@@ -119,7 +117,10 @@ jZone.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){
     if(jId!==null)continue; // already controlled
-    jId=t.identifier; updateJoystickMetrics();
+    jId=t.identifier;
+    // Floating: move base to touch point
+    jCX=t.clientX; jCY=t.clientY;
+    jBase.style.left=jCX+'px'; jBase.style.top=jCY+'px';
     jThumb.style.left=jCX+'px'; jThumb.style.top=jCY+'px';
     jThumb.classList.add('active');
   }
@@ -142,12 +143,14 @@ jZone.addEventListener('touchend',e=>{
   for(const t of e.changedTouches){
     if(t.identifier===jId){
       jId=null; jThumb.classList.remove('active');
-      jThumb.style.left=jCX+'px'; jThumb.style.top=jCY+'px';
+      // Reset base to default position
+      jBase.style.left=''; jBase.style.top='';
+      jThumb.style.left='50%'; jThumb.style.top='50%';
       clearJoystickKeys();
     }
   }
 });
-jZone.addEventListener('touchcancel',e=>{jId=null;jThumb.classList.remove('active');jThumb.style.left=jCX+'px';jThumb.style.top=jCY+'px';clearJoystickKeys();});
+jZone.addEventListener('touchcancel',e=>{jId=null;jThumb.classList.remove('active');jBase.style.left='';jBase.style.top='';jThumb.style.left='50%';jThumb.style.top='50%';clearJoystickKeys();});
 
 // ── Jump / Confirm button (traditional tap button) ──
 const btnJump=document.querySelector('.btn-jump');
