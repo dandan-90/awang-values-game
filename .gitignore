@@ -1,0 +1,11 @@
+*.txt
+*.py
+*.json
+*.docx
+*.jpg
+*.jpeg
+*.png
+*.gif
+_values_docx/
+awang_3view.jpg
+test_*.js
