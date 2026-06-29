@@ -2,21 +2,52 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>阿旺的价值观之旅 - 三旺通信</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#5C94FC;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Noto Sans SC',sans-serif;overflow:hidden;}
-#game-wrapper{position:relative;width:960px;height:640px;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.35),0 0 0 3px #4A6BCC;}
-canvas{display:block;border-radius:12px;}
+body{background:#5C94FC;display:flex;justify-content:center;align-items:center;min-height:100vh;min-height:100dvh;font-family:'Noto Sans SC',sans-serif;overflow:hidden;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+#game-wrapper{position:relative;box-shadow:0 8px 40px rgba(0,0,0,.35),0 0 0 3px #4A6BCC;border-radius:12px;overflow:hidden;width:960px;height:640px;max-width:100vw;max-height:100vh;max-height:100dvh;}
+canvas{display:block;border-radius:12px;width:100%!important;height:100%!important;}
+/* Touch controls — hidden on desktop, visible on touch devices */
+#touch-controls{display:none;position:absolute;inset:0;z-index:10;pointer-events:none;}
+#touch-controls.active{display:block;}
+.touch-btn{position:absolute;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:50%;pointer-events:auto;touch-action:none;transition:background .1s;-webkit-tap-highlight-color:transparent;}
+.touch-btn:active,.touch-btn.pressed{background:rgba(255,255,255,.55);border-color:#FFF;}
+.btn-left{left:4%;bottom:12%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
+.btn-right{left:22%;bottom:12%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
+.btn-up{left:13%;bottom:28%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
+.btn-down{left:13%;bottom:0%;width:14vw;height:14vw;max-width:80px;max-height:80px;}
+.btn-a{right:16%;bottom:18%;width:18vw;height:18vw;max-width:100px;max-height:100px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:bold;}
+.btn-b{right:4%;bottom:8%;width:14vw;height:14vw;max-width:75px;max-height:75px;font-size:14px;display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:bold;}
+.btn-label{font-size:clamp(14px,3vw,22px);font-weight:700;color:#FFF;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.btn-label-sm{font-size:clamp(10px,2.5vw,16px);font-weight:700;color:#FFF;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+/* Arrow indicators inside d-pad */
+.btn-arrow{font-size:clamp(16px,4vw,30px);color:#FFF;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.6);line-height:1;}
+.ctrl-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:11px;font-family:'Noto Sans SC',sans-serif;pointer-events:none;text-align:center;width:100%;}
+/* Show keyboard hints on desktop */
+.kb-hint{display:block;}
+@media(hover:hover)and(pointer:fine){.kb-hint{display:block}.ctrl-hint{display:none}}
+@media(hover:none)and(pointer:coarse){.kb-hint{display:none}.ctrl-hint{display:block}}
 </style>
 </head>
 <body>
-<div id="game-wrapper"><canvas id="game"></canvas></div>
+<div id="game-wrapper">
+<canvas id="game"></canvas>
+<div id="touch-controls">
+  <!-- D-Pad for L2 (4-direction) -->
+  <div class="touch-btn btn-up" data-key="w,arrowup"><span class="btn-arrow">▲</span></div>
+  <div class="touch-btn btn-down" data-key="s,arrowdown"><span class="btn-arrow">▼</span></div>
+  <div class="touch-btn btn-left" data-key="a,arrowleft"><span class="btn-arrow">◀</span></div>
+  <div class="touch-btn btn-right" data-key="d,arrowright"><span class="btn-arrow">▶</span></div>
+  <!-- A/B buttons for actions (jump / confirm) -->
+  <div class="touch-btn btn-a" data-key=" "><span class="btn-label">Jump</span></div>
+</div>
+</div>
 <script>
 // ═══════════════════════════════════════════════════
-//  阿旺的价值观之旅 v5.0 — 技能系统+大宝物+通关庆祝
+//  阿旺的价值观之旅 v5.1 — PC+移动端双端支持
 // ═══════════════════════════════════════════════════
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const W=960,H=640;canvas.width=W;canvas.height=H;
@@ -38,6 +69,66 @@ let gs=S.MENU,st=0,ta=1,gt=0;
 const keys={};
 window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code]=true;e.preventDefault()});
 window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;keys[e.code]=false});
+
+// ════════════════════════════════
+//  TOUCH & MOBILE SUPPORT
+// ════════════════════════════════
+const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||('ontouchstart' in window);
+const tcEl=document.getElementById('touch-controls');
+const wrapperEl=document.getElementById('game-wrapper');
+if(isMobile||!window.matchMedia('(hover:hover) and (pointer:fine)').matches){tcEl.classList.add('active');}
+// Canvas auto-scale to fit viewport
+function scaleCanvas(){
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const scale=Math.min(vw/960,vh/640);
+  wrapperEl.style.width=(960*scale)+'px';
+  wrapperEl.style.height=(640*scale)+'px';
+}
+scaleCanvas();window.addEventListener('resize',scaleCanvas);window.addEventListener('orientationchange',()=>setTimeout(scaleCanvas,200));
+
+// Touch button handling — set keys on touch
+const activeTouches=new Map(); // touchId → {keys, el}
+function handleTouchStart(e){
+  e.preventDefault();const btn=e.target.closest('.touch-btn');if(!btn)return;
+  btn.classList.add('pressed');
+  const keyStr=btn.dataset.key||' ';
+  const karr=keyStr.split(',');
+  for(const t of e.changedTouches){
+    activeTouches.set(t.identifier,{keys:karr,el:btn});
+    for(const k of karr)keys[k]=true;
+  }
+}
+function handleTouchMove(e){
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    // Release old button
+    const old=activeTouches.get(t.identifier);
+    if(old){old.el.classList.remove('pressed');for(const k of old.keys)keys[k]=false;}
+    // Check new button under finger
+    const el=document.elementFromPoint(t.clientX,t.clientY);
+    const btn=el?el.closest('.touch-btn'):null;
+    if(btn){
+      btn.classList.add('pressed');
+      const karr=(btn.dataset.key||' ').split(',');
+      activeTouches.set(t.identifier,{keys:karr,el:btn});
+      for(const k of karr)keys[k]=true;
+    }else{activeTouches.delete(t.identifier);}
+  }
+}
+function handleTouchEnd(e){
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    const old=activeTouches.get(t.identifier);
+    if(old){old.el.classList.remove('pressed');for(const k of old.keys)keys[k]=false;activeTouches.delete(t.identifier);}
+  }
+}
+tcEl.addEventListener('touchstart',handleTouchStart,{passive:false});
+tcEl.addEventListener('touchmove',handleTouchMove,{passive:false});
+tcEl.addEventListener('touchend',handleTouchEnd,{passive:false});
+tcEl.addEventListener('touchcancel',handleTouchEnd,{passive:false});
+// Mobile: tap canvas for menu actions (space)
+if(isMobile){canvas.addEventListener('click',()=>{keys[' ']=true;keys['enter']=true;setTimeout(()=>{keys[' ']=false;keys['enter']=false},120);});}
+else{canvas.addEventListener('click',()=>{keys[' ']=true;setTimeout(()=>keys[' ']=false,100)});}
 
 function lerp(a,b,t){return a+(b-a)*t}
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
@@ -694,7 +785,7 @@ if(!ctx.ellipse){ctx.ellipse=function(x,y,rx,ry,rot,sa,ea,ccw){ctx.save();ctx.tr
 // Initialize and start
 ta=0.01; // Start with minimal fade instead of full black
 lt=performance.now();requestAnimationFrame(loop);
-console.log('🎮 阿旺的价值观之旅 v5.0 — 技能系统+大宝物+通关庆祝');
+console.log('🎮 阿旺的价值观之旅 v5.1 — PC+移动端双端支持');
 </script>
 </body>
 </html>
