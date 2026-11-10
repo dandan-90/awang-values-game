@@ -23,25 +23,26 @@
   --sw-shadow:0 12px 40px rgba(0,0,0,.45);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
-body{background:radial-gradient(circle at 50% 20%,#1a2a5e 0%,#0B1026 60%,#050714 100%);display:flex;justify-content:center;align-items:center;min-height:100vh;min-height:100dvh;font-family:'Noto Sans SC',sans-serif;overflow:hidden;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
-#game-wrapper{position:relative;box-shadow:var(--sw-shadow),0 0 0 2px rgba(111,184,255,.25),0 0 60px rgba(58,123,213,.25);border-radius:16px;overflow:hidden;width:960px;height:640px;max-width:100vw;max-height:100vh;max-height:100dvh;background:#000;transition:box-shadow .3s ease;}
-#game-wrapper:hover{box-shadow:var(--sw-shadow),0 0 0 3px rgba(111,184,255,.4),0 0 80px rgba(58,123,213,.35);}
-canvas{display:block;border-radius:16px;width:100%!important;height:100%!important;}
+html,body{height:100%;-webkit-font-smoothing:none;text-rendering:geometricPrecision;}
+body{background:#0B1026;background-image:linear-gradient(rgba(111,184,255,.035) 2px,transparent 2px),linear-gradient(90deg,rgba(111,184,255,.035) 2px,transparent 2px);background-size:16px 16px;display:flex;justify-content:center;align-items:center;min-height:100vh;min-height:100dvh;font-family:'Zpix','Fusion Pixel 12px monospaced','DotGothic16','Noto Sans SC',monospace;overflow:hidden;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+/* Pixel frame: hard edges, stepped double border, no soft shadow */
+#game-wrapper{position:relative;border:4px solid #6FB8FF;box-shadow:0 0 0 4px #1B4B8F,0 0 0 8px #0B1026,12px 12px 0 8px rgba(0,0,0,.55);border-radius:0;overflow:hidden;width:960px;height:640px;max-width:100vw;max-height:100vh;max-height:100dvh;background:#0B1026;}
+#game-wrapper:hover{border-color:#A8D8FF;box-shadow:0 0 0 4px #2E6FC4,0 0 0 8px #0B1026,12px 12px 0 8px rgba(0,0,0,.55);}
+canvas{display:block;border-radius:0;width:100%!important;height:100%!important;image-rendering:pixelated;image-rendering:crisp-edges;}
 /* Touch controls — hidden on desktop, visible on touch devices */
 #touch-controls{display:none;position:absolute;inset:0;z-index:10;pointer-events:none;}
 #touch-controls.active{display:block;}
-/* Virtual Joystick */
+/* Virtual Joystick — pixel square pad */
 #joystick-zone{position:absolute;left:0;bottom:0;width:48%;height:72%;pointer-events:auto;touch-action:none;}
-#joystick-base{position:absolute;left:24%;bottom:24%;width:clamp(88px,22vw,124px);height:clamp(88px,22vw,124px);border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.12),rgba(255,255,255,.04));border:2.5px solid rgba(255,255,255,.35);box-shadow:0 6px 24px rgba(0,0,0,.25),inset 0 0 20px rgba(111,184,255,.08);pointer-events:none;transform:translate(-50%,-50%);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
-#joystick-thumb{position:absolute;width:clamp(44px,11vw,62px);height:clamp(44px,11vw,62px);border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.55),rgba(255,255,255,.3));border:2px solid rgba(255,255,255,.75);box-shadow:0 4px 16px rgba(0,0,0,.2),0 0 14px rgba(111,184,255,.35);pointer-events:none;transform:translate(-50%,-50%);transition:background .1s,box-shadow .1s;}
-#joystick-thumb.active{background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.8),rgba(111,184,255,.55));border-color:#FFF;box-shadow:0 0 22px rgba(111,184,255,.6);}
-/* Jump button */
-.touch-btn{position:absolute;border-radius:50%;pointer-events:auto;touch-action:none;transition:transform .08s,background .1s,box-shadow .1s;-webkit-tap-highlight-color:transparent;}
-.touch-btn.pressed{transform:scale(.92)!important;background:rgba(255,255,255,.7)!important;border-color:#FFF!important;box-shadow:0 0 28px rgba(255,209,102,.55)!important;}
-.btn-jump{right:12%;bottom:18%;width:clamp(92px,21vw,122px);height:clamp(92px,21vw,122px);background:radial-gradient(circle at 35% 35%,rgba(255,209,102,.35),rgba(255,209,102,.16));border:2.5px solid rgba(255,209,102,.65);box-shadow:0 8px 28px rgba(0,0,0,.25),0 0 22px rgba(255,209,102,.2);display:flex;align-items:center;justify-content:center;}
-.btn-label{font-size:clamp(15px,3.2vw,22px);font-weight:800;color:#FFF;text-shadow:0 1px 4px rgba(0,0,0,.45);letter-spacing:.5px;}
-.ctrl-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.55);font-size:clamp(10px,1.8vw,12px);font-family:'Noto Sans SC',sans-serif;pointer-events:none;text-align:center;width:100%;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+#joystick-base{position:absolute;left:24%;bottom:24%;width:clamp(88px,22vw,124px);height:clamp(88px,22vw,124px);border-radius:0;background:rgba(20,40,90,.55);border:4px solid rgba(111,184,255,.75);box-shadow:0 0 0 4px rgba(11,16,38,.8),inset 0 0 0 4px rgba(11,16,38,.55),8px 8px 0 rgba(0,0,0,.4);pointer-events:none;transform:translate(-50%,-50%);}
+#joystick-thumb{position:absolute;width:clamp(44px,11vw,62px);height:clamp(44px,11vw,62px);border-radius:0;background:#6FB8FF;border:4px solid #E8EEF8;box-shadow:0 0 0 4px #1B4B8F,6px 6px 0 rgba(0,0,0,.45);pointer-events:none;transform:translate(-50%,-50%);transition:background .1s;}
+#joystick-thumb.active{background:#FFC93C;border-color:#FFF3B0;box-shadow:0 0 0 4px #8A5A18,6px 6px 0 rgba(0,0,0,.45);}
+/* Jump button — pixel square */
+.touch-btn{position:absolute;border-radius:0;pointer-events:auto;touch-action:none;transition:transform .08s,background .1s;-webkit-tap-highlight-color:transparent;}
+.touch-btn.pressed{transform:scale(.92)!important;background:#FFE27A!important;border-color:#FFF3B0!important;box-shadow:0 0 0 4px #8A5A18,6px 6px 0 rgba(0,0,0,.45)!important;}
+.btn-jump{right:12%;bottom:18%;width:clamp(92px,21vw,122px);height:clamp(92px,21vw,122px);background:#F4703A;border:4px solid #FFD0A0;box-shadow:0 0 0 4px #8A2E1E,8px 8px 0 rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;}
+.btn-label{font-size:clamp(15px,3.2vw,22px);font-weight:800;color:#FFF;text-shadow:3px 3px 0 #8A2E1E;letter-spacing:1px;}
+.ctrl-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:#A8D8FF;font-size:clamp(10px,1.8vw,12px);font-family:'Zpix','Fusion Pixel 12px monospaced','DotGothic16','Noto Sans SC',monospace;pointer-events:none;text-align:center;width:100%;text-shadow:2px 2px 0 #0B1026;}
 .kb-hint{display:block;}
 @media(hover:hover)and(pointer:fine){.kb-hint{display:block}.ctrl-hint{display:none}}
 @media(hover:none)and(pointer:coarse){.kb-hint{display:none}.ctrl-hint{display:block}}
@@ -63,10 +64,160 @@ canvas{display:block;border-radius:16px;width:100%!important;height:100%!importa
 </div>
 <script>
 // ═══════════════════════════════════════════════════
-//  阿旺的价值观之旅 v6.1 — 深度视觉精化
+//  阿旺的价值观之旅 v7.0 — 全像素风重制 (Pixel Remaster)
 // ═══════════════════════════════════════════════════
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const canvas=document.getElementById('game');
 const W=960,H=640;canvas.width=W;canvas.height=H;
+
+// ══════════════════════════════════════════════════════════════
+//  PIXEL RENDER ENGINE  ·  全局像素渲染引擎
+//  职责：统一接管"如何绘制"，把一切图形转成 4px 网格像素画。
+//  原则：不改变任何游戏坐标、尺寸、状态、规则、布局与文案。
+// ══════════════════════════════════════════════════════════════
+const PX=4;                                   // 像素块尺寸
+const PAL=[                                   // 统一有限调色板
+  [11,16,38],[20,28,58],[31,43,82],[46,61,107],[58,76,130],
+  [27,75,143],[46,111,196],[74,144,217],[111,184,255],[168,216,255],
+  [30,122,140],[58,176,196],[111,224,232],[184,245,240],
+  [30,92,52],[46,139,74],[88,196,106],[155,232,140],[214,245,168],
+  [138,90,24],[200,144,30],[255,201,60],[255,226,122],[255,243,176],
+  [138,46,30],[196,74,40],[244,112,58],[255,154,90],[255,208,160],
+  [74,42,122],[122,74,184],[168,120,224],[208,168,245],
+  [42,46,62],[74,82,104],[122,132,156],[184,194,216],[232,238,248],[255,255,255],
+  [74,46,30],[122,74,46],[168,108,62],[208,154,90]
+];
+const QC=new Map();
+function pxSnap(v){return Math.round(v/PX)*PX}
+function pxQuant(c){
+  if(typeof c!=='string')return c;
+  if(QC.has(c))return QC.get(c);
+  if(QC.size>4000)QC.clear();
+  const s=c.trim().toLowerCase();let r=0,g=0,b=0,a=1,m;
+  if(s==='transparent'){QC.set(c,'rgba(0,0,0,0)');return QC.get(c)}
+  if((m=s.match(/^#([0-9a-f]{3,4})$/))){const h=m[1];r=parseInt(h[0]+h[0],16);g=parseInt(h[1]+h[1],16);b=parseInt(h[2]+h[2],16);if(h.length===4)a=parseInt(h[3]+h[3],16)/255}
+  else if((m=s.match(/^#([0-9a-f]{6})([0-9a-f]{2})?$/))){const h=m[1];r=parseInt(h.slice(0,2),16);g=parseInt(h.slice(2,4),16);b=parseInt(h.slice(4,6),16);if(m[2])a=parseInt(m[2],16)/255}
+  else if((m=s.match(/^rgba?\(([^)]+)\)$/))){const p=m[1].split(',').map(v=>parseFloat(v.trim()));r=p[0]|0;g=p[1]|0;b=p[2]|0;if(p.length>3)a=p[3]}
+  else{QC.set(c,c);return c}
+  if(!(a>0)){QC.set(c,'rgba(0,0,0,0)');return QC.get(c)}
+  let best=PAL[0],bd=1e9;
+  for(let i=0;i<PAL.length;i++){const p=PAL[i],dr=r-p[0],dg=g-p[1],db=b-p[2],d=dr*dr*.3+dg*dg*.59+db*db*.11;if(d<bd){bd=d;best=p}}
+  const out=a>=1?`rgb(${best[0]},${best[1]},${best[2]})`:`rgba(${best[0]},${best[1]},${best[2]},${a.toFixed(3)})`;
+  QC.set(c,out);return out;
+}
+// 渐变 → 4 段硬色带（保留层次，消灭平滑过渡）
+function pxGradAt(st,t){if(!st.length)return 'rgb(11,16,38)';let best=st[0][1],bd=1e9;for(let i=0;i<st.length;i++){const d=Math.abs(st[i][0]-t);if(d<bd){bd=d;best=st[i][1]}}return best}
+function pxBuildGrad(v,prop,raw){
+  const st=v.stops.slice().sort((a,b)=>a[0]-b[0]);
+  const ar=v.args.map(n=>typeof n==='number'?pxSnap(n):n);
+  const g=v.kind==='radial'?raw.createRadialGradient(ar[0],ar[1],ar[2],ar[3],ar[4],ar[5]):raw.createLinearGradient(ar[0],ar[1],ar[2],ar[3]);
+  const N=4;
+  for(let i=0;i<N;i++){const a0=i/N,a1=(i+1)/N,col=pxGradAt(st,(a0+a1)/2);g.addColorStop(a0,col);if(a1<1)g.addColorStop(Math.min(1,a1-.0001),col)}
+  g.addColorStop(1,pxGradAt(st,1));
+  raw[prop]=g;
+}
+// 方块化：圆 / 椭圆 / 圆角矩形 → 网格单元
+function pxArcCells(cx,cy,rx,ry,sa,ea){
+  const out=[];if(!(rx>0)||!(ry>0))return out;
+  const full=sa===0&&Math.abs(ea-Math.PI*2)<.001;
+  const x0=pxSnap(cx-rx),x1=pxSnap(cx+rx),y0=pxSnap(cy-ry),y1=pxSnap(cy+ry);
+  for(let y=y0;y<=y1;y+=PX)for(let x=x0;x<=x1;x+=PX){
+    const dx=(x+PX/2-cx)/(rx+PX*.15),dy=(y+PX/2-cy)/(ry+PX*.15);
+    if(dx*dx+dy*dy>1)continue;
+    if(!full){let a=Math.atan2(dy,dx);if(a<0)a+=Math.PI*2;let s=((sa%(Math.PI*2))+Math.PI*2)%(Math.PI*2),e=((ea%(Math.PI*2))+Math.PI*2)%(Math.PI*2);if(e<=s)e+=Math.PI*2;if(a<s)a+=Math.PI*2;if(a>e)continue}
+    out.push([pxSnap(x),pxSnap(y)]);
+  }
+  return out;
+}
+function pxRoundCells(x,y,w,h,r){
+  const out=[],R=typeof r==='number'?r:(r&&r.tl)||0;
+  const x0=pxSnap(x),y0=pxSnap(y),x1=pxSnap(x+w),y1=pxSnap(y+h),rad=pxSnap(Math.max(0,Math.min(R,w/2,h/2)));
+  for(let yy=y0;yy<y1;yy+=PX){const cy=yy+PX/2;let ins=0;
+    if(cy<y0+rad){const d=y0+rad-cy;ins=rad-Math.sqrt(Math.max(0,rad*rad-d*d))}
+    else if(cy>y1-rad){const d=cy-(y1-rad);ins=rad-Math.sqrt(Math.max(0,rad*rad-d*d))}
+    const L=pxSnap(x0+ins),Rr=pxSnap(x1-ins);
+    for(let xx=L;xx<Rr;xx+=PX)out.push([xx,yy]);
+  }
+  return out;
+}
+function pxEdgeCells(cells){const set=new Set(cells.map(c=>c[0]+','+c[1]));return cells.filter(([x,y])=>!set.has((x-PX)+','+y)||!set.has((x+PX)+','+y)||!set.has(x+','+(y-PX))||!set.has(x+','+(y+PX)))}
+const PX_FONT='"Zpix","Fusion Pixel 12px monospaced","DotGothic16","Press Start 2P","Noto Sans SC",monospace';
+function pxFont(v){return String(v).replace(/"Noto Sans SC"|'Noto Sans SC'|Noto Sans SC/g,PX_FONT)}
+
+function makePixelCtx(raw){
+  let pending=[],curX=0,curY=0;
+  const flush=(mode)=>{
+    if(!pending.length)return;
+    const pathCells=[],solidCells=[];
+    for(const s of pending){
+      let cells=s.kind==='round'?pxRoundCells(s.x,s.y,s.w,s.h,s.r):pxArcCells(s.x,s.y,s.rx,s.ry,s.sa,s.ea);
+      if(mode==='stroke'){cells=pxEdgeCells(cells);if(s.kind==='round'){solidCells.push(...cells);continue}}
+      pathCells.push(...cells);
+    }
+    pending=[];
+    // 圆角面板描边 → 实心像素边框（更精致、更统一）
+    if(solidCells.length){
+      const fs=raw.fillStyle;raw.fillStyle=raw.strokeStyle;
+      for(let i=0;i<solidCells.length;i++)raw.rect(solidCells[i][0],solidCells[i][1],PX,PX);
+      raw.fill();raw.fillStyle=fs;raw.beginPath();
+    }
+    for(let i=0;i<pathCells.length;i++)raw.rect(pathCells[i][0],pathCells[i][1],PX,PX);
+  };
+  const ov={
+    // ── 路径：形状延迟到 fill / stroke 时才决定是填充还是描边 ──
+    beginPath(){pending=[];curX=curY=0;raw.beginPath()},
+    closePath(){raw.closePath()},
+    arc(x,y,r,sa=0,ea=Math.PI*2){pending.push({kind:'arc',x,y,rx:r,ry:r,sa,ea})},
+    ellipse(x,y,rx,ry,rot=0,sa=0,ea=Math.PI*2){pending.push({kind:'arc',x,y,rx,ry,sa,ea})},
+    roundRect(x,y,w,h,r=0){pending.push({kind:'round',x,y,w,h,r})},
+    rect(x,y,w,h){flush('fill');raw.rect(pxSnap(x),pxSnap(y),pxSnap(w),pxSnap(h));curX=x+w;curY=y+h},
+    moveTo(x,y){flush('fill');raw.moveTo(pxSnap(x),pxSnap(y));curX=x;curY=y},
+    lineTo(x,y){flush('fill');raw.lineTo(pxSnap(x),pxSnap(y));curX=x;curY=y},
+    quadraticCurveTo(cx,cy,x,y){flush('fill');const sx=curX,sy=curY,N=8;
+      for(let i=1;i<=N;i++){const t=i/N,u=1-t;raw.lineTo(pxSnap(u*u*sx+2*u*t*cx+t*t*x),pxSnap(u*u*sy+2*u*t*cy+t*t*y))}
+      curX=x;curY=y},
+    bezierCurveTo(a,b,c,d,x,y){flush('fill');const sx=curX,sy=curY,N=8;
+      for(let i=1;i<=N;i++){const t=i/N,u=1-t;raw.lineTo(pxSnap(u*u*u*sx+3*u*u*t*a+3*u*t*t*c+t*t*t*x),pxSnap(u*u*u*sy+3*u*u*t*b+3*u*t*t*d+t*t*t*y))}
+      curX=x;curY=y},
+    fill(){flush('fill');raw.fill()},
+    stroke(){flush('stroke');raw.stroke()},
+    clip(){flush('fill');raw.clip()},
+    // ── 直接绘制 ──
+    fillRect(x,y,w,h){raw.fillRect(pxSnap(x),pxSnap(y),pxSnap(w),pxSnap(h))},
+    strokeRect(x,y,w,h){raw.strokeRect(pxSnap(x),pxSnap(y),pxSnap(w),pxSnap(h))},
+    clearRect(x,y,w,h){pending=[];raw.clearRect(pxSnap(x),pxSnap(y),pxSnap(w),pxSnap(h))},
+    fillText(text,x,y,mw){const noGlow=raw.shadowBlur===0,fs=raw.fillStyle;let restore=false;
+      // 可读性保护：浅色低透明文字在深色像素面板上会消失，仅对文字提亮
+      if(typeof fs==='string'){const m=fs.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+        if(m&&parseFloat(m[4])<.34&&parseFloat(m[1])>140&&parseFloat(m[2])>140&&parseFloat(m[3])>140){raw.fillStyle=`rgba(${m[1]},${m[2]},${m[3]},.55)`;restore=true}}
+      if(noGlow){raw.shadowColor='rgba(0,0,0,.85)';raw.shadowOffsetX=2;raw.shadowOffsetY=2}
+      if(mw!==undefined)raw.fillText(text,x,y,mw);else raw.fillText(text,x,y);
+      if(noGlow){raw.shadowOffsetX=0;raw.shadowOffsetY=0;raw.shadowColor='rgba(0,0,0,0)'}
+      if(restore)raw.fillStyle=fs;},
+    strokeText(text,x,y,mw){if(mw!==undefined)raw.strokeText(text,x,y,mw);else raw.strokeText(text,x,y)},
+    setLineDash(a){raw.setLineDash(a.map(v=>Math.max(PX,pxSnap(v))))},
+    // ── 渐变：返回伪对象，赋值时构建色带 ──
+    createLinearGradient(...a){const v={__px:1,kind:'linear',args:a,stops:[],addColorStop(o,c){this.stops.push([Math.max(0,Math.min(1,o)),pxQuant(c)])}};return v},
+    createRadialGradient(...a){const v={__px:1,kind:'radial',args:a,stops:[],addColorStop(o,c){this.stops.push([Math.max(0,Math.min(1,o)),pxQuant(c)])}};return v},
+    measureText(t){return raw.measureText(t)}
+  };
+  return new Proxy(raw,{
+    get(t,k){if(k in ov)return ov[k];const v=Reflect.get(raw,k);return typeof v==='function'?v.bind(raw):v},
+    set(t,k,v){
+      if(k==='fillStyle'||k==='strokeStyle'){if(v&&v.__px)pxBuildGrad(v,k,raw);else raw[k]=typeof v==='string'?pxQuant(v):v;return true}
+      if(k==='shadowBlur'){raw.shadowBlur=0;return true}
+      if(k==='shadowColor'){raw.shadowColor=typeof v==='string'?pxQuant(v):v;return true}
+      if(k==='shadowOffsetX'||k==='shadowOffsetY'){raw[k]=pxSnap(v);return true}
+      if(k==='lineWidth'){raw.lineWidth=Math.max(2,pxSnap(v));return true}
+      if(k==='font'){raw.font=pxFont(v);return true}
+      raw[k]=v;return true;
+    },
+    has(t,k){return k in ov||Reflect.has(raw,k)}
+  });
+}
+const rawCtx=canvas.getContext('2d');
+const ctx=makePixelCtx(rawCtx);
+rawCtx.imageSmoothingEnabled=false;
+
 
 let actx=null;
 function audioCtx(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx}
@@ -1056,7 +1207,7 @@ if(!ctx.ellipse){ctx.ellipse=function(x,y,rx,ry,rot,sa,ea,ccw){ctx.save();ctx.tr
 // Initialize and start
 ta=0.01; // Start with minimal fade instead of full black
 lt=performance.now();requestAnimationFrame(loop);
-console.log('🎮 阿旺的价值观之旅 v6.1 — 深度视觉精化');
+console.log('🎮 阿旺的价值观之旅 v7.0 — 全像素风重制');
 </script>
 </body>
 </html>
